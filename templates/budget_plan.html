@@ -1,0 +1,425 @@
+{% extends "_base.html" %}
+
+{% block title %}Your Budget Plan{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h1 class="mb-0">Your Budget Plan</h1>
+        <span class="badge bg-success rounded-pill fs-6">Planning & Monitoring Phase</span>
+    </div>
+    <p class="lead mb-4"><strong>Project Goal:</strong> {{ goal }}</p>
+    <hr class="mb-4">
+
+    <div class="row g-4"> {# Use Bootstrap grid #}
+
+        {# --- Left Column (Research, Proposal, AI Chat) --- #}
+        <div class="col-lg-7 order-lg-1"> {# Order ensures this comes first on large screens #}
+
+            {# --- Research Summary Section --- #}
+            {% if research_summary and 'not available' not in research_summary|lower and 'blocked by safety' not in research_summary|lower %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0"><i class="bi bi-search me-2 text-info"></i>AI Research Summary</h2>
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#researchCollapse" aria-expanded="false" aria-controls="researchCollapse">
+                        Show/Hide
+                    </button>
+                </div>
+                <div class="collapse show" id="researchCollapse"> {# Start shown #}
+                    <div class="card-body">
+                        <p style="white-space: pre-wrap;">{{ research_summary }}</p>
+                    </div>
+                </div>
+            </div>
+            {% elif research_summary %}
+             <div class="alert alert-warning small"><i class="bi bi-exclamation-triangle me-1"></i>{{ research_summary }}</div>
+            {% endif %}
+
+
+            {# --- AI Proposed Budget Section --- #}
+            <div class="card shadow-sm mb-4">
+                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0"><i class="bi bi-lightbulb me-2 text-warning"></i>AI Proposed Budget</h2>
+                     <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#proposalCollapse" aria-expanded="false" aria-controls="proposalCollapse">
+                        Show/Hide
+                    </button>
+                 </div>
+                 <div class="collapse show" id="proposalCollapse"> {# Start shown #}
+                    <div class="card-body">
+                        {% if initial_budget and not initial_budget_has_error %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0"> {# Bootstrap table styling #}
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th class="text-end">Proposed Amount / %</th> {# Right align values #}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for category, amount in initial_budget.items()|sort %} {# Sort categories alphabetically #}
+                                        <tr>
+                                            <td>{{ category }}</td>
+                                            <td class="text-end">
+                                                {% if amount is number %}
+                                                    ${{ "{:,.2f}".format(amount) }}
+                                                {% else %}
+                                                    {{ amount }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% if not is_percentage_based and initial_total is defined and initial_total > 0 %}
+                                            <tr class="table-group-divider">
+                                                <td><strong>Total Proposed</strong></td>
+                                                <td class="text-end"><strong>${{ "{:,.2f}".format(initial_total) }}</strong></td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% if is_percentage_based %}
+                                <p class="small text-muted fst-italic mt-2 mb-0">Note: Percentage-based proposal. Provide a total budget for dollar allocations and dynamic features.</p>
+                            {% endif %}
+                        {% elif initial_budget_has_error %}
+                            <p class="text-danger mb-0"><i class="bi bi-exclamation-octagon me-1"></i>Error in initial budget proposal: {{ initial_budget.get("Error", "Unknown error") }}</p>
+                        {% else %}
+                            <p class="text-secondary mb-0">No budget proposal could be generated or processed correctly.</p>
+                        {% endif %}
+                    </div>
+                 </div>
+            </div>
+
+
+            {# --- AI Interaction Section --- #}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0"><i class="bi bi-chat-dots-fill me-2"></i>Interact with Budget AI</h2>
+                    <span class="badge bg-light text-primary rounded-pill">Beta</span>
+                </div>
+                <div class="card-body">
+                    {# Conversation History #}
+                    <div id="ai-conversation-history" class="ai-conversation-history mb-3 p-3 bg-light rounded border" style="max-height: 400px; overflow-y: auto; font-size: 0.9rem;">
+                        {% if ai_conversation %}
+                            {% for msg in ai_conversation %}
+                                {% if msg.user %}
+                                    <div class="d-flex justify-content-end mb-2">
+                                        <div class="bg-secondary-subtle text-dark-emphasis rounded-3 px-3 py-2 mw-75"> {# Use div for better wrapping #}
+                                            <strong>You:</strong><br>{{ msg.user }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {% if msg.ai %}
+                                     <div class="d-flex justify-content-start mb-2">
+                                        {# Use pre-wrap for AI responses that might have formatting #}
+                                         <div class="bg-primary-subtle text-dark-emphasis rounded-3 px-3 py-2 mw-75" style="white-space: pre-wrap;">
+                                            <strong>AI:</strong><br>{{ msg.ai }}
+                                         </div>
+                                     </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                             <p class="small text-muted text-center mb-0">Ask a question or request a change to start the conversation.</p>
+                        {% endif %}
+                    </div>
+
+                    {# --- Pending Modification Display & Controls --- #}
+                    {% if pending_modification and not pending_modification.get("Error") %}
+                        <div class="pending-modification-section border rounded p-3 mb-3 bg-warning-subtle">
+                            <h4 class="h6 text-dark"><i class="bi bi-pencil-square me-1"></i>AI Suggestion: Proposed Budget Changes</h4>
+                            <p class="small">The AI proposes the following budget based on your last request. Review carefully before applying.</p>
+                            {# Display the pending modification dictionary clearly #}
+                            <div class="table-responsive mb-3" style="max-height: 200px; overflow-y:auto;">
+                                <table class="table table-sm table-bordered small bg-white">
+                                    <thead class="table-light">
+                                        <tr><th>Category</th><th class="text-end">Proposed Amount</th></tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for category, amount in pending_modification.items()|sort %}
+                                        {# Highlight changed values? More complex logic needed #}
+                                        <tr>
+                                            <td>{{ category }}</td>
+                                            <td class="text-end">
+                                                {% if amount is number %}
+                                                    ${{ "{:,.2f}".format(amount) }}
+                                                {% else %}
+                                                    {{ amount }} {# Should not happen #}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                     {# Calculate and show proposed total #}
+                                     {% set proposed_total = pending_modification.values()|select('number')|sum %}
+                                     <tr class="fw-bold table-group-divider">
+                                         <td>Proposed Total</td>
+                                         <td class="text-end">${{ "{:,.2f}".format(proposed_total) }}</td>
+                                     </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {# Approve/Reject Forms #}
+                            <div class="d-flex justify-content-around gap-2">
+                                <form method="POST" action="{{ url_for('apply_modification', action='approve') }}" class="flex-grow-1">
+                                    <button type="submit" class="btn btn-success btn-sm w-100"><i class="bi bi-check-lg me-1"></i>Approve</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('apply_modification', action='reject') }}" class="flex-grow-1">
+                                    <button type="submit" class="btn btn-danger btn-sm w-100"><i class="bi bi-x-lg me-1"></i>Reject</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% elif pending_modification and pending_modification.get("Error") %}
+                         <div class="alert alert-danger small">Error in pending modification: {{ pending_modification.get("Error") }}</div>
+                    {% endif %}
+
+                    {# --- Standard Input Form (Hidden if valid modification pending) --- #}
+                    {% if not pending_modification or pending_modification.get("Error") %}
+                         {# Only show input if no valid mod is pending #}
+                        <form method="POST" action="{{ url_for('interact_ai') }}">
+                            <div class="mb-2">
+                                <label for="ai_request" class="form-label visually-hidden">Your question or modification request:</label>
+                                <textarea class="form-control form-control-sm" id="ai_request" name="ai_request" rows="2" required placeholder="Ask AI (e.g., 'Explain contingency', 'Increase X by $Y')..." aria-label="AI request input"></textarea> {# Reduced rows #}
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-send me-1"></i>Send to AI</button>
+                        </form>
+                    {% endif %} {# End pending_mod check for showing input #}
+                </div>
+            </div>
+
+
+        </div> {# End Left Column #}
+
+
+        {# --- Right Column (Chart, Current Status, Reallocation Log) --- #}
+        <div class="col-lg-5 order-lg-2"> {# Order ensures this comes second on large screens #}
+
+            {# --- Budget Chart (Only if Numeric Budget) --- #}
+            {% if not is_percentage_based and current_budget and not current_budget.get("Error", None) is string %}
+             <div class="card shadow-sm mb-4">
+                 <div class="card-header bg-light">
+                     <h2 class="h5 mb-0"><i class="bi bi-pie-chart-fill me-2 text-success"></i>Current Allocation</h2>
+                 </div>
+                <div class="card-body text-center px-2 py-3"> {# Adjusted padding #}
+                     {% if chart_labels and chart_labels|length > 0 %}
+                         <div style="position: relative; height:300px; width:100%;"> {# Use relative container for aspect ratio #}
+                            <canvas id="budgetPieChart"></canvas>
+                         </div>
+                    {% else %}
+                        <p class="text-muted small my-3">No positive budget items to display in chart.</p>
+                    {% endif %}
+                </div>
+             </div>
+            {% endif %}
+
+            {# --- Current Budget Status & Reallocation (Only if Numeric Budget) --- #}
+            {% if not is_percentage_based and current_budget and not current_budget.get("Error", None) is string %}                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h2 class="h5 mb-0"><i class="bi bi-clipboard-data me-2 text-primary"></i>Current Status & Actions</h2>
+                    </div>
+                    <div class="card-body">
+                         {#--- Current Totals Table ---#}
+                         <h3 class="h6 mb-2">Budget Summary</h3>
+                         <div class="table-responsive mb-3">
+                             <table class="table table-sm table-striped mb-0 small">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for category, amount in current_budget.items()|sort %}
+                                    <tr>
+                                        <td>{{ category }}</td>
+                                        <td class="text-end">${{ "{:,.2f}".format(amount) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr class="fw-bold table-group-divider">
+                                        <td>Current Total</td>
+                                        <td class="text-end">${{ "{:,.2f}".format(current_total) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                         </div>
+
+                         <hr>
+                         {# --- Reallocation Forms --- #}
+                        <h3 class="h6 mb-2">Simulate Dynamic Event</h3>
+                        <p class="small text-muted mb-2">Trigger an event to test dynamic reallocation.</p>
+                        <form method="POST" action="{{ url_for('trigger_event') }}" class="mb-3 border-bottom pb-3">
+                             <div class="mb-2">
+                                 <label for="event_category" class="form-label small mb-1">Target Category:</label>
+                                 <input type="text" class="form-control form-control-sm" id="event_category" name="event_category" required placeholder="e.g., Materials, Emergency Fund">
+                             </div>
+                             <div class="mb-2">
+                                <label for="event_amount" class="form-label small mb-1">Amount Needed ($):</label>
+                                <input type="number" class="form-control form-control-sm" id="event_amount" name="event_amount" step="0.01" required placeholder="e.g., 1500.50">
+                             </div>
+                            <button type="submit" class="btn btn-warning btn-sm w-100"><i class="bi bi-exclamation-diamond me-1"></i>Trigger Custom Event</button>
+                        </form>
+                         <form method="POST" action="{{ url_for('trigger_random_event') }}">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-shuffle me-1"></i>Trigger Random Event</button>
+                        </form>
+                    </div>
+                </div>
+
+                 {# --- Reallocation Log --- #}
+                <div class="card shadow-sm mb-4">
+                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0"><i class="bi bi-list-check me-2 text-secondary"></i>Activity Log</h3>
+                         <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#logCollapse" aria-expanded="false" aria-controls="logCollapse">
+                            Show/Hide
+                        </button>
+                     </div>
+                     <div class="collapse show" id="logCollapse"> {# Start shown #}
+                        <div class="card-body p-0">
+                            <div class="log p-3" style="max-height: 300px; overflow-y: auto;">
+                                {% if log %}
+                                    {% for entry in log|reverse %}
+                                        <div class="log-entry small">{{ entry }}</div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="small text-muted mb-0">No activity recorded yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+             {# --- Placeholders/Messages for other states --- #}
+            {% elif initial_budget_has_error %}
+                 <div class="card shadow-sm mb-4 border-danger">
+                     <div class="card-body">
+                         <p class="text-danger mb-0"><i class="bi bi-exclamation-octagon me-1"></i>Budget generation failed. Cannot display chart or actions. See proposal section for details.</p>
+                     </div>
+                 </div>
+             {% elif is_percentage_based %}
+                 <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <p class="text-muted text-center small"><i class="bi bi-info-circle me-1"></i>Chart, status, and dynamic actions require a dollar-based budget proposal.</p>
+                    </div>
+                 </div>
+             {% else %}
+                 {# Catch-all for unexpected state #}
+                  <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <p class="text-muted text-center small">Budget details not available for display.</p>
+                    </div>
+                 </div>
+            {% endif %}
+
+
+        </div> {# End Right Column #}
+
+    </div> {# End Row #}
+
+
+    <div class="text-center mt-4 mb-5">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i> Start New Budget Plan</a>
+    </div>
+
+{% endblock %}
+
+
+{# --- Block Scripts (Chart.js and scroll script) --- #}
+{% block scripts %}
+{# --- Chart.js Script --- #}
+{% if not is_percentage_based and current_budget and chart_labels and chart_values and chart_labels|length > 0 %}
+<script>
+  const ctx = document.getElementById('budgetPieChart');
+  if (ctx) { // Ensure canvas element exists
+      // Generate distinct colors
+      function generateColors(numColors) {
+        const fixedColors = [
+            '#0d6efd', '#6f42c1', '#198754', '#ffc107', '#dc3545',
+            '#0dcaf0', '#fd7e14', '#20c997', '#6c757d', '#adb5bd',
+            '#d63384', '#86301c' , '#6610f2', '#fd7e14' // Some more example colors
+        ];
+        const colors = fixedColors.slice(0, numColors);
+        if (numColors > fixedColors.length) {
+            for (let i = fixedColors.length; i < numColors; i++) {
+              // Generate random-ish distinct colors - simple version
+              const hue = Math.floor(Math.random() * 360);
+              const saturation = Math.floor(Math.random() * 30) + 70; // 70-100%
+              const lightness = Math.floor(Math.random() * 20) + 50; // 50-70%
+              colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+            }
+        }
+        return colors;
+      }
+
+    //   const chartData = {
+    //     labels: {{ chart_labels|tojson }},
+    //     datasets: [{
+    //       label: 'Budget Allocation ($)',
+    //       data: {{ chart_values|tojson }},
+    //       backgroundColor: generateColors({{ chart_labels|length }}),
+    //       hoverOffset: 8,
+    //       borderWidth: 1,
+    //       borderColor: '#fff' // White border for separation
+    //     }]
+    //   };
+
+      // Destroy previous chart instance if it exists
+      let budgetChart = Chart.getChart(ctx);
+      if (budgetChart) {
+        budgetChart.destroy();
+      }
+
+      // Create new chart
+      budgetChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false, // Important for sizing in container
+          plugins: {
+            legend: {
+              display: true, // Generally useful to have legend
+              position: 'bottom',
+              align: 'start',
+              labels: {
+                    boxWidth: 12,
+                    padding: 10,
+                    font: { size: 11 } // Slightly larger legend font
+               }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.label || '';
+                  if (label) { label += ': '; }
+                  if (context.parsed !== null) {
+                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed);
+                     let total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                     let percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) + '%' : '0%';
+                     label += ` (${percentage})`;
+                  }
+                  return label;
+                }
+              }
+            },
+             title: { display: false }
+          },
+          cutout: '60%' // Adjust doughnut thickness
+        }
+      });
+  } else {
+      console.warn("Canvas element 'budgetPieChart' not found.");
+  }
+</script>
+{% endif %}
+
+{# Script to scroll AI chat to bottom #}
+<script>
+    const chatBox = document.getElementById('ai-conversation-history');
+    if (chatBox) {
+        // Scroll to bottom after page loads and elements are rendered
+        window.addEventListener('load', () => {
+             chatBox.scrollTop = chatBox.scrollHeight;
+        });
+         // Also scroll if dynamically added content changes height (might need MutationObserver for perfect solution)
+         // Simple approach: check on interval briefly after load? Less ideal.
+         // Sticking with load event for now.
+    }
+</script>
+
+{% endblock %}

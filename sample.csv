@@ -1,0 +1,11 @@
+Budget Item,Category,Estimated Cost (USD),Allocated Budget (USD),Comments
+Bridge Design,Planning,500000,520000,"Architectural and engineering design costs"
+Site Survey,Planning,150000,140000,"Environmental and topographical surveys"
+Materials,Construction,3000000,2900000,"Steel, concrete, and other essential materials"
+Labor,Construction,2000000,2050000,"Skilled labor wages, including overtime"
+Equipment Rental,Construction,800000,850000,"Rental of heavy machinery and tools"
+Contingency,Contingency,500000,500000,"Reserved for unexpected costs"
+Traffic Control System,Traffic Management,600000,610000,"Installation of traffic signal control system"
+Signage and Lighting,Traffic Management,200000,190000,"Bridge lighting and road signage installation"
+Permits and Insurance,Administrative,300000,300000,"Government permits, insurance, and legal fees"
+Miscellaneous Expenses,Other,100000,105000,"Other unforeseen expenses"

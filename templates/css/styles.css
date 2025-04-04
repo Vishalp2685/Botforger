@@ -1,0 +1,225 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1, h2, h3 {
+    color: #0056b3; /* A slightly darker blue */
+    margin-bottom: 1em;
+}
+
+h1 { text-align: center; }
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+    width: 95%; /* Adjust width */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+button, input[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.card h2, .card h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px 12px; /* Increased padding */
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background-color: #f2f7fc; /* Lighter blue header */
+    font-weight: bold;
+    color: #333;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.log {
+    margin-top: 20px;
+    border-top: 1px solid #ccc;
+    padding-top: 15px;
+    max-height: 250px;
+    overflow-y: auto;
+    background-color: #fdfdfd;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.log-entry {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dotted #eee;
+    color: #555;
+    line-height: 1.4;
+}
+.log-entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.flashes li {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.flashes .error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.flashes .success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flashes .warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.button-group {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px; /* Adds space between buttons */
+}
+
+/* Style for the initial proposed budget if it's percentage based */
+.percentage-note {
+    font-style: italic;
+    color: #666;
+    margin-top: -10px;
+    margin-bottom: 15px;
+}
+
+.value-cell {
+    text-align: right; /* Align numbers/percentages to the right */
+}
+/* Keep log styling for better readability */
+.log {
+    font-size: 0.85em;
+    line-height: 1.5;
+}
+
+.log-entry {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dotted #eee;
+    color: #555;
+    word-wrap: break-word; /* Prevent long lines from breaking layout */
+}
+.log-entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Ensure AI conversation badges wrap text properly */
+.ai-conversation-history .badge {
+    white-space: normal; /* Allow text wrapping */
+    text-align: left;    /* Align text left within the badge */
+    display: inline-block; /* Ensure badge takes width */
+    max-width: 100%;     /* Prevent overflow */
+}
+/* Set max width for user/ai bubbles */
+.mw-75 {
+    max-width: 75% !important;
+}
+
+
+/* Improve table responsiveness slightly */
+.table-responsive {
+    max-height: 400px; /* Example max height */
+    /* overflow-y: auto; */ /* Added in template */
+}
+
+/* Ensure footer stays down (might need more body/html flex styling depending on content height) */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.container.mt-4.mb-5 {
+    flex: 1; /* Allow content area to grow */
+}

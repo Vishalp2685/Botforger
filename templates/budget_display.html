@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Budget - Plan</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 60%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .log { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; max-height: 200px; overflow-y: auto; }
+        .log-entry { margin-bottom: 5px; font-size: 0.9em; color: #555; }
+        .highlight { color: red; font-weight: bold; }
+        .error { color: red; font-weight: bold;}
+        .success { color: green; }
+        .research { background-color: #eef; padding: 15px; margin-bottom: 20px; border: 1px solid #ccd; border-radius: 5px;}
+    </style>
+</head>
+<body>
+    <h1>Budget Plan for: {{ goal }}</h1>
+
+    {% if research_summary %}
+    <div class="research">
+        <h2>Research Summary</h2>
+        <p style="white-space: pre-wrap;">{{ research_summary }}</p>
+    </div>
+    {% endif %}
+
+    <h2>Initial Proposed Budget</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Proposed Amount / %</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category, amount in initial_budget.items() %}
+            <tr>
+                <td>{{ category }}</td>
+                <td>
+                    {% if isinstance(amount, float) or isinstance(amount, int) %}
+                        ${{ "%.2f"|format(amount) }}
+                    {% else %}
+                        {{ amount }} {# Display percentage or placeholder text #}
+                    {% endif %}
+                 </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Current Budget Status</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Current Allocated Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category, amount in current_budget.items() %}
+            <tr>
+                <td>{{ category }}</td>
+                 <td>${{ "%.2f"|format(amount) }}</td>
+            </tr>
+            {% endfor %}
+             <tr>
+                <td><strong>Total</strong></td>
+                <td><strong>${{ "%.2f"|format(total_budget) }}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Simulate Event & Reallocate</h2>
+    <form method="POST" action="{{ url_for('trigger_event') }}">
+         <p>Simulate an unforeseen event requiring reallocation (e.g., unexpected price increase, urgent need).</p>
+         <label for="event_category">Target Category:</label>
+         <input type="text" id="event_category" name="event_category" value="Contingency Usage" required>
+         <label for="event_amount">Amount Needed:</label>
+         <input type="number" id="event_amount" name="event_amount" step="100" value="1000" required>
+        <button type="submit">Trigger Custom Event</button>
+    </form>
+     <br>
+     <form method="POST" action="{{ url_for('trigger_random_event') }}">
+        <button type="submit">Trigger Random Urgent Event</button>
+    </form>
+
+     {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class=flashes style="margin-top:15px;">
+            {% for category, message in messages %}
+                <div class="{{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+
+    <div class="log">
+        <h3>Reallocation Log</h3>
+        {% if log %}
+            {% for entry in log|reverse %}
+                <div class="log-entry">{{ entry }}</div>
+            {% endfor %}
+        {% else %}
+            <p>No reallocations yet.</p>
+        {% endif %}
+    </div>
+    <hr>
+    <a href="/">Start New Budget Plan</a>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+{% extends "_base.html" %}
+
+{% block title %}Start Planning{% endblock %}
+
+{% block content %}
+    <div class="text-center mb-5 pt-3">
+        <h1 class="display-5 fw-bold">Smart Budget Planner</h1>
+        <p class="lead col-lg-8 mx-auto text-muted">Describe your project goal, provide an estimated budget, and optionally upload previous budget data to let the AI assistant guide you.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+             <div class="card shadow-sm border-0">
+                 <div class="card-body p-4 p-lg-5">
+                    {# *** ADD enctype for file upload *** #}
+                    <form method="POST" action="{{ url_for('start_planning') }}" enctype="multipart/form-data">
+                        {# Project Goal #}
+                        <div class="mb-3">
+                            <label for="goal" class="form-label fs-5 mb-2">Project Goal:</label>
+                            <textarea class="form-control form-control-lg" id="goal" name="goal" rows="4" required placeholder="e.g., Build a pedestrian bridge..."></textarea>
+                        </div>
+
+                        {# Estimated Budget Amount #}
+                        <div class="mb-3">
+                            <label for="budget_amount" class="form-label fs-5 mb-2">Estimated Budget Amount:</label>
+                            <input type="number" class="form-control form-control-lg" id="budget_amount" name="budget_amount" step="any" min="0" required placeholder="e.g., 50000">
+                        </div>
+
+                        {# Currency #}
+                         <div class="mb-3">
+                            <label for="currency" class="form-label fs-5 mb-2">Currency Symbol/Code:</label>
+                            <input type="text" class="form-control form-control-lg" id="currency" name="currency" placeholder="e.g., $, £, €, INR, USD (default: $)">
+                         </div>
+
+                        {# *** NEW: File Upload *** #}
+                         <div class="mb-4">
+                            <label for="budget_file" class="form-label fs-5 mb-2">Upload Previous Budget Data (Optional):</label>
+                            <input class="form-control form-control-lg" type="file" id="budget_file" name="budget_file" accept=".csv,.json,.txt">
+                            <div class="form-text mt-1">Upload a CSV, JSON, or TXT file with relevant historical data. (Max ~100KB)</div>
+                        </div>
+                        {# *** END NEW *** #}
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Start Budget Planning <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </form>
+                 </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

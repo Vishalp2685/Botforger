@@ -1,0 +1,31 @@
+{% extends "_base.html" %}
+
+{% block title %}Clarifying Questions{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Step 2: Provide Details</h1>
+        <span class="badge bg-secondary rounded-pill fs-6">Questions Phase</span>
+    </div>
+    <p class="lead mb-4">To create an accurate budget for: <strong class="text-primary">{{ goal }}</strong>, please answer these AI-generated questions:</p>
+
+    <form method="POST" action="{{ url_for('generate_plan') }}">
+         {% for i in range(questions|length) %}
+        <div class="card mb-4 shadow-sm">
+             <div class="card-header bg-light fw-bold">
+                 Question {{ i+1 }}
+             </div>
+             <div class="card-body">
+                 <div class="mb-1"> {# Reduced margin #}
+                    <label for="answer_{{ i }}" class="form-label">{{ questions[i] }}</label>
+                    {# Pre-fill answers if validation failed #}
+                    <textarea class="form-control" id="answer_{{ i }}" name="answer_{{ i }}" rows="3" required placeholder="Your detailed answer here...">{{ answers.get('answer_' ~ i, '') if answers else '' }}</textarea>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+             {# Add a back button? Maybe later. #}
+            <button type="submit" class="btn btn-primary btn-lg px-4">Generate Budget Plan <i class="bi bi-arrow-right ms-1"></i></button>
+        </div>
+    </form>
+{% endblock %}
